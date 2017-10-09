@@ -6,6 +6,7 @@ use Libs\Extrator as Extrator;
 use Libs\Downloader as Downloader;
 
 class Crawler {
+    const TEMPO_LIMITE = 1800; // meia hora
     var $extrator;
     var $downloader;
 
@@ -33,6 +34,10 @@ class Crawler {
     }
     
     function start($limite = false) {
+        if($this->esta_travado()) return false;
+        
+        $this->travar();
+        
         $lista = $this->get_novos();
         if($limite === false || $limite > count($lista)) $limite = count($lista);
 
@@ -42,6 +47,8 @@ class Crawler {
                 $this->downloader->executar();
         }
 
+        $this->destravar();
+
         return true;
     }
     
@@ -50,6 +57,34 @@ class Crawler {
         $novos = count($this->get_novos());
         
         return (($all-$novos)/$all)*100;
+    }
+    
+    function esta_travado() {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        
+        if(!file_exists($this->downloader->pasta.'/crawler.lock')) return false;
+        $momento = (int)file_get_contents($this->downloader->pasta.'/crawler.lock');
+        if((time() - $momento) > self::TEMPO_LIMITE) {
+            @unlink($this->downloader->pasta.'/crawler.lock');
+            return false;
+        }
+        return true;
+    }
+    
+    function travar() {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        
+        if(file_exists($this->downloader->pasta.'/crawler.lock')) return false;
+        file_put_contents($this->downloader->pasta.'/crawler.lock', time());
+        return true;
+    }
+    
+    function destravar() {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        
+        if(!file_exists($this->downloader->pasta.'/crawler.lock')) return false;
+        @unlink($this->downloader->pasta.'/crawler.lock');
+        return true;
     }
 }
 
