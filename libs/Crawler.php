@@ -83,6 +83,8 @@ class Crawler {
     
     function get_log() {
         if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        if(!file_exists($this->downloader->pasta.'/log.json')) return [];
+        
         return json_decode(file_get_contents($this->downloader->pasta.'/log.json'));
     }
     
