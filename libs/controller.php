@@ -39,4 +39,19 @@ function get_progresso() {
     global $crawler;
     return $crawler->progresso();
 }
+/*
+    Retorna o log dos ultimos nerdcasts baixados
+    returns vetor de strings
+*/
+function get_log() {
+    global $crawler;
+    return $crawler->get_log();
+}
+/*
+    Deleta o log esvazeando
+*/
+function reset_log() {
+    global $crawler;
+    $crawler->delete_log();
+}
 ?>

@@ -7,6 +7,7 @@ use Libs\Downloader as Downloader;
 
 class Crawler {
     const TEMPO_LIMITE = 1800; // meia hora
+    const TAMANHO_LOG = 5; // quantidade de elementos no arquivo log
     var $extrator;
     var $downloader;
 
@@ -43,8 +44,10 @@ class Crawler {
 
         for($loop = 0; $loop < $limite; $loop++) {
             $this->downloader->set_url($lista[$loop]);
-            if(!$this->downloader->checar_existe())
+            if(!$this->downloader->checar_existe()) {
                 $this->downloader->executar();
+                $this->put_log($this->downloader->url2nome($lista[$loop]));
+            }
         }
 
         $this->destravar();
@@ -57,6 +60,35 @@ class Crawler {
         $novos = count($this->get_novos());
         
         return (($all-$novos)/$all)*100;
+    }
+    
+    function put_log($nome) {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        $lista = array();
+        if(file_exists($this->downloader->pasta.'/log.json')) $lista = json_decode(file_get_contents($this->downloader->pasta.'/log.json'));
+        
+        $lista[count($lista)] = $nome;
+        
+        if(count($lista) > self::TAMANHO_LOG) {
+            for($i = 0; $i < count($lista)-1; $i++) {
+                $lista[$i] = $lista[$i+1];
+            }
+            unset($lista[count($lista)-1]);
+        }
+        
+        file_put_contents($this->downloader->pasta.'/log.json', json_encode($lista));
+        
+        return true;
+    }
+    
+    function get_log() {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        return json_decode(file_get_contents($this->downloader->pasta.'/log.json'));
+    }
+    
+    function delete_log() {
+        if($this->downloader->pasta == '') throw new \Exception('Pasta dos NerdCast não definida');
+        @unlink($this->downloader->pasta.'/log.json');
     }
     
     function esta_travado() {
