@@ -2,7 +2,7 @@
     "autoload": {
         "psr-4": {"Libs\\": "libs"}
     },
-    "require-dev": {
-        "phpunit/phpunit": "^5.5.0"
+    "suggested": {
+        "phpunit/phpunit": "Para executar os testes unitários"
     }
 }

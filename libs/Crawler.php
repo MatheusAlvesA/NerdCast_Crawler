@@ -16,7 +16,13 @@ class Crawler {
         $this->downloader = new Downloader;
     }
     
-    function set_pasta($pasta) {$this->downloader->set_pasta($pasta);}
+    function set_pasta($pasta) {
+        if(file_exists($pasta) || mkdir($pasta, 0777, true))
+            $this->downloader->set_pasta($pasta);
+        else
+            throw new \Exception("A pasta não pode ser criada", 1);
+            
+    }
     
     function get_todos() {return $this->extrator->extrair();}
     
